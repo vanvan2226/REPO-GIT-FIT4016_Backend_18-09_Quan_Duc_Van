@@ -1,0 +1,143 @@
+--LibraryContext.cs
+using Microsoft.EntityFrameworkCore;    
+using BaiKiemTraLan2.Models;            
+namespace BaiKiemTraLan2.Data
+{
+    public class LibraryContext : DbContext
+    {
+        public LibraryContext(DbContextOptions<LibraryContext> options)
+            : base(options)
+        {
+        }
+
+        public DbSet<Book> Books { get; set; }
+        public DbSet<Borrowing> Borrowings { get; set; }
+    }
+}
+
+
+--LibraryContextFactory.cs
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+using BaiKiemTraLan2.Data;   
+
+namespace BaiKiemTraLan2.Data
+{
+    public class LibraryContextFactory
+        : IDesignTimeDbContextFactory<LibraryContext>
+    {
+        public LibraryContext CreateDbContext(string[] args)
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<LibraryContext>();
+
+            optionsBuilder.UseSqlServer(
+                "Server=.;Database=LibraryManagement;Trusted_Connection=True;TrustServerCertificate=True"
+            );
+
+            return new LibraryContext(optionsBuilder.Options);
+        }
+    }
+}
+
+--Book.cs
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+namespace BaiKiemTraLan2.Models
+{
+    public class Book
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public string Isbn { get; set; } = null!;
+
+        [Required]
+        public string Title { get; set; } = null!;
+
+        [Required]
+        public string Author { get; set; } = null!;
+
+        public string? Publisher { get; set; }
+
+        public int? PublicationYear { get; set; }
+
+        [Required]
+        public string Category { get; set; } = null!;
+
+        public int TotalCopies { get; set; }
+        public int AvailableCopies { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+
+        public ICollection<Borrowing>? Borrowings { get; set; }
+    }
+}
+
+
+--Borwning.cs
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace BaiKiemTraLan2.Models
+{
+    public class Borrowing
+    {
+        [Key]
+        public int Id { get; set; }
+
+        [Required]
+        public int BookId { get; set; }
+
+        [ForeignKey("BookId")]
+        public Book Book { get; set; } = null!;
+
+        [Required]
+        public string BorrowerName { get; set; } = null!;
+
+        [Required]
+        public string BorrowerPhone { get; set; } = null!;
+
+        [Required]
+        [EmailAddress]
+        public string BorrowerEmail { get; set; } = null!;
+
+        public DateTime BorrowDate { get; set; }
+        public DateTime DueDate { get; set; }
+        public DateTime? ReturnDate { get; set; }
+
+        public string Status { get; set; } = null!;
+
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+    }
+}
+
+--BaiKiemTraLan2.csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.2">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
+
+--program.cs
+using System;
+
+Console.WriteLine("EF Core Console App");
